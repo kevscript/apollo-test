@@ -2,6 +2,7 @@ require('dotenv').config()
 const { ApolloServer, gql } = require('apollo-server')
 const mongoose = require('mongoose')
 
+// schemas
 const Dog = require('./models/dog')
 
 const typeDefs = gql`
@@ -11,7 +12,8 @@ const typeDefs = gql`
     age: Int!
   }
   type Mutation {
-    addDog(name: String!, age: Int!): Dog!
+    addDog(name: String!, age: Int!): Dog
+    deleteDog(name: String!): Dog
   }
 
   type Query {
@@ -33,13 +35,29 @@ const resolvers = {
   },
   Mutation: {
     addDog: async (_, {name, age}) => {
-      const newDog = new Dog({
-        name,
-        age
+      await Dog.findOne({ name: name }, async (err, res) => {
+        if (err) {
+          return new Error("An error occured")
+        }
+        if (res) {
+          return new Error(`A dog named ${name} already exists`)
+        } else {
+          const newDog = new Dog({ name, age })
+          await newDog.save()
+        }
       })
-
-      const res = await newDog.save()
-      return newDog
+    },
+    deleteDog: async (_, {name}) => {
+      await Dog.findOne({ name: name }, async (err, res) => {
+        if (err) {
+          return new Error("An error occured")
+        }
+        if (res) {
+          await Dog.deleteOne(res)
+        } else {
+          return new Error("No dog found with this name")
+        }
+      })
     }
   }
 }
@@ -49,6 +67,6 @@ const server = new ApolloServer({ typeDefs, resolvers })
 const port = 4000
 
 mongoose
-  .connect(process.env.MONGODB, { useNewUrlParser: true })
+  .connect(process.env.MONGODB, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => server.listen({ port }))
   .then(() => console.log(`server running on port ${port}`))
