@@ -5,7 +5,7 @@ import gql from 'graphql-tag'
 const FETCH_DOGS_QUERY = gql`
   query GetDogs {
     getDogs {
-      id
+      _id
       name
       age
     }
@@ -15,7 +15,7 @@ const FETCH_DOGS_QUERY = gql`
 const ADD_DOG_MUTATION = gql`
   mutation AddDog($name: String!, $age: Int!) {
     addDog(name: $name, age: $age) {
-      id
+      _id
       name
       age
     }
@@ -23,9 +23,9 @@ const ADD_DOG_MUTATION = gql`
 `
 
 const DELETE_DOG_MUTATION = gql`
-  mutation DeleteDog($name: String!) {
-    deleteDog(name: $name) {
-      id
+  mutation DeleteDog($id: String!) {
+    deleteDog(id: $id) {
+      _id
       age
       name
     }
@@ -63,9 +63,9 @@ const App = () => {
   }
 
   const handleDelete = async (e) => {
-    const name = e.target.getAttribute('data-name')
+    const dogId = e.target.getAttribute('data-id')
     try {
-      await deleteDog({ variables: { name: name } })
+      await deleteDog({ variables: { id: dogId } })
     } catch(err) {
       console.log('error deleting', err)
     }
@@ -75,9 +75,9 @@ const App = () => {
     <div>
       HI FROM APP
       { dogs && dogs.map(dog => 
-        <div key={dog.id} style={{display:'flex', alignItems:'center'}}>
-          <h3>name: {dog.name} / age: {dog.age} / id: {dog.id}</h3>
-          <button data-name={dog.name} onClick={e => handleDelete(e)}>X</button>
+        <div key={dog._id} style={{display:'flex', alignItems:'center'}}>
+          <h3>name: {dog.name} / age: {dog.age} / id: {dog._id}</h3>
+          <button data-id={dog._id} onClick={e => handleDelete(e)}>X</button>
         </div>
       )}
       <form onSubmit={e => handleSubmit(e)}>
