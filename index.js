@@ -7,15 +7,14 @@ const Dog = require('./models/dog')
 
 const typeDefs = gql`
   type Dog {
-    id: ID!
+    _id: String!
     name: String!
     age: Int!
   }
   type Mutation {
     addDog(name: String!, age: Int!): Dog
-    deleteDog(name: String!): Dog
+    deleteDog(id: String!): Dog
   }
-
   type Query {
     getDogs: [Dog]
   }
@@ -47,15 +46,15 @@ const resolvers = {
         }
       })
     },
-    deleteDog: async (_, {name}) => {
-      await Dog.findOne({ name: name }, async (err, res) => {
+    deleteDog: async (_, {id}) => {
+      await Dog.findOne({ _id: id }, async (err, res) => {
         if (err) {
           return new Error("An error occured")
         }
         if (res) {
           await Dog.deleteOne(res)
         } else {
-          return new Error("No dog found with this name")
+          return new Error("No dog found with this id")
         }
       })
     }
